@@ -1,77 +1,66 @@
 class DLSpec {
-  def top
+  def structure = []
 
-  def and(Object[] args) { buildJunction('⊓', args) }
-  def or(Object[] args) { buildJunction('⊔', args) }
+  def and(Object[] args) { buildJunction('⊓', args); }
+  def or(Object[] args) { buildJunction('⊔', args); }
 
   def gt(amt, r, Object[] args) { buildQuantifier('≥', r, amt, args) }
   def lt(amt, r, Object[] args) { buildQuantifier('≤', r, amt, args) }
 
-  def some(r, Object[] args) { buildQuantifier('∃', r, null, args) }
+  def some(r, Object[] args) { buildQuantifier('∃', r, null, args); }
   def all(r, Object[] args) { buildQuantifier('∀', r, null, args) }
 
   private buildQuantifier(String quantifier, String r, amt, Object[] args) {
-    def first = true
-
+    def rule = [:]
+    rule['operation'] = quantifier
     if(amt) {
-      print "$quantifier$amt $r."
-    } else {
-      print "$quantifier$r."
+      rule['amount'] = amt
     }
 
-    args.each { x ->
+    args.eachWithIndex { x, i ->
       if(x instanceof String) {
-        print x
+        rule[i] = x
       } else if(x instanceof Closure) {
         def dl = new DLSpec()
         def code = x.rehydrate(dl, this, this)
         code.resolveStrategy = Closure.DELEGATE_ONLY
-        print '('
         code()
-        print ')'
+        rule[i] = dl.structure
       }
-      first = false
     }
 
-    if(top) {
-      println ''
-    }
+    structure << rule
   }
 
   private buildJunction(String junction, Object[] args) {
-    def first = true
+    def rule = [:]
+    rule['operation'] = junction
 
-    args.each { x ->
-      if(!first) {
-        print " $junction "
-      }
+    args.eachWithIndex { x, i ->
       if(x instanceof String) {
-        print x
+        rule[i] = x
       } else if(x instanceof Closure) {
         def dl = new DLSpec()
         def code = x.rehydrate(dl, this, this)
         code.resolveStrategy = Closure.DELEGATE_ONLY
-        print '('
         code()
-        print ')'
+        rule[i] = dl.structure
       }
-      first = false
     }
-
-    if(top) {
-      println ''
-    }
+    
+    structure << rule
   }
 }
 
 def ABox(@DelegatesTo(DLSpec) Closure cl) {
-    def dl = new DLSpec(top: true)
+    def dl = new DLSpec()
     def code = cl.rehydrate(dl, this, this)
     code.resolveStrategy = Closure.DELEGATE_ONLY
     code()
+    return dl.structure
 }
 
-ABox {
+println ABox {
   or 'A', {
     and 'C', { gt 3, 'hasSquirrel', 'B' }
   }
