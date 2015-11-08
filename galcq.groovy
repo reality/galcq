@@ -1,3 +1,5 @@
+import dsl
+
 // Merge the TBox into the ABox
 
 // AND rule:
@@ -16,4 +18,50 @@
 // Condition: A contains (UQr.C)(a) and r(a, b) but not C(b)
 // Action: A' = A UNION {C(b)}
 
+def ontology = new Ontology()
 
+// TODO: In ABox only top level blocks allowed should be instance
+ontology.setABox {}
+
+ontology.setTBox {
+  gci {
+    all 'r', { 
+      all 's', {
+        and 'A', {
+          some 'r', {
+            all 's', {
+              and 'B', {
+                all 'r', {
+                  some 's', 'C'
+                }
+              }
+            }
+          }
+        }
+      } 
+    }
+  }, {
+    some 'r' {
+      some 's' {
+        and 'A' {
+          and 'B', 'C' 
+        }
+      }
+    }
+  }
+}
+
+ontology.checkConsistency()
+
+
+/*
+ontology.setABox {
+  or 'A', {
+    and 'C', { gt 3, 'hasSquirrel', 'B' }
+  }
+  all 'hasSibling', {
+    or 'Female', 'Male' 
+  }
+  gt 2, 'hasSibling', 'Biscuit'
+}
+*/
