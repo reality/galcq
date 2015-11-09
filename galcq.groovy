@@ -25,7 +25,10 @@ ontology.setTBox {
   gci 'Woman', {
     and 'Person', 'Female'
   }
-  gci 'Person', 'Sleepy'
+  gci 'Person', {
+    and 'Sleepy', 'Biscuit'
+  }
+  gci 'Biscuit', 'Squirrel'
 }
 
 println ontology.TBox
