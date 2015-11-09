@@ -18,11 +18,11 @@ class Ontology {
     TBox = dl.structure
   }
 
-  // Here we expand all of the concepts in the TBox and add them to the ABox
+  // Here we use concept expansion on the generalised concept inclusions in the TBox, 
+  //   converting them to fully expanded ABox axioms
   def convertTBox() {
     TBox.each {
       ['left', 'right'].each { rule ->
-        println 'expanding ' + rule
         it[rule] = expand(it[rule], it)
       }
 
@@ -40,22 +40,18 @@ class Ontology {
 
   def expand(rule, wgci) {
     if(rule instanceof String) {
-      def expander = TBox.find { gci -> // find a gci with a 0 which is == to our thing
+      def expander = TBox.find { gci -> // find a gci with a left which is == to our thing
         return rule == gci.left && gci != wgci
       }
       if(expander) {
-        println 'matched ' + rule + ' with '  + expander
         rule = expander.right
-        println rule
         return expand(rule, wgci)
       }
-
-      return rule
     } else if(rule instanceof ArrayList) {
       rule.collect { expand(it, wgci) }
     } else {
-      ['left', 'right'].collect { expand(rule[it], wgci) }
+      ['left', 'right'].each { rule[it] = expand(rule[it], wgci) }
     }
+    return rule
   }
 }
-
