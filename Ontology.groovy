@@ -21,14 +21,15 @@ class Ontology {
   // Here we expand all of the concepts in the TBox and add them to the ABox
   def convertTBox() {
     TBox.each {
-      it = it.collect { rule ->
-        return expand(rule)
+      ['left', 'right'].each { rule ->
+        println 'expanding ' + rule
+        it[rule] = expand(it[rule], it)
       }
 
       ABox << [
         'type': 'instance',
-        'definition': it[0],
-        'instance': it[1]
+        'definition': it['right'],
+        'instance': it['left']
       ]
     }
   }
@@ -37,20 +38,23 @@ class Ontology {
     return new Reasoner(this).checkConsistency()
   }
 
-  // Apparently it's naughty to put this in there?
-  def expand(rule) {
-    [0, 1].collect { 
-      if(rule[it] instanceof String) {
-        def expander = TBox.find { gci -> // find a gci with a 0 which is == to our thing
-          return rule[it] == gci[0]
-        }
-        if(expander) {
-          rule[it] = expander[1]
-          return expand(rule[it])
-        }
-        return rule[it]
+  def expand(rule, wgci) {
+    if(rule instanceof String) {
+      def expander = TBox.find { gci -> // find a gci with a 0 which is == to our thing
+        return rule == gci.left && gci != wgci
       }
-      return expand(rule[it])
+      if(expander) {
+        println 'matched ' + rule + ' with '  + expander
+        rule = expander.right
+        println rule
+        return expand(rule, wgci)
+      }
+
+      return rule
+    } else if(rule instanceof ArrayList) {
+      rule.collect { expand(it, wgci) }
+    } else {
+      ['left', 'right'].collect { expand(rule[it], wgci) }
     }
   }
 }

@@ -18,7 +18,7 @@ class DLSpec {
       rule['amount'] = amt
     }
 
-    args.eachWithIndex { x, i ->
+    ['left':args[0], 'right':args[1]].each { i, x ->
       if(x instanceof String) {
         rule[i] = x
       } else if(x instanceof Closure) {
@@ -37,7 +37,7 @@ class DLSpec {
     def rule = [:]
     rule['operation'] = junction
 
-    args.eachWithIndex { x, i ->
+    ['left':args[0], 'right':args[1]].each { i, x ->
       if(x instanceof String) {
         rule[i] = x
       } else if(x instanceof Closure) {

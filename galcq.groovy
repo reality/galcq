@@ -30,6 +30,12 @@ ontology.setTBox {
 
 println ontology.TBox
 
+println 'Converting TBox'
+
+ontology.convertTBox()
+
+println ontology.ABox
+
 /*ontology.setTBox {
   gci {
     all 'r', { 

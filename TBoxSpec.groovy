@@ -1,7 +1,7 @@
 class TBoxSpec extends DLSpec {
-  def gci(Object a, Object b) {
+  def gci(Object left, Object right) {
     def rule = [:]
-    [a, b].eachWithIndex { block, i ->
+    ['left':left, 'right':right].each { i, block ->
       if(block instanceof String) {
         rule[i] = block
       } else if(block instanceof Closure) {
