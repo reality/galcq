@@ -15,7 +15,7 @@ class Reasoner {
   def and() {
     def vRule = ontology.ABox.findAll { return it.operation == '⊓' }.find { instance ->
       def cA = ontology.ABox.find { rule ->
-        return rule.definition == 
+         
       }
       def cB
 

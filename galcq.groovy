@@ -1,5 +1,3 @@
-import dsl
-
 // Merge the TBox into the ABox
 
 // AND rule:
@@ -24,6 +22,15 @@ def ontology = new Ontology()
 ontology.setABox {}
 
 ontology.setTBox {
+  gci 'Woman', {
+    and 'Person', 'Female'
+  }
+  gci 'Person', 'Sleepy'
+}
+
+println ontology.TBox
+
+/*ontology.setTBox {
   gci {
     all 'r', { 
       all 's', {
@@ -52,7 +59,7 @@ ontology.setTBox {
 }
 
 ontology.checkConsistency()
-
+*/
 
 /*
 ontology.setABox {
