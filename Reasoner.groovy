@@ -18,13 +18,12 @@ class Reasoner {
     }
 
     // ABox is complete, so now we will search for an open ABox
-    println ABoxen
     println ABoxen.any { ABox ->
       !ABox.any { rule ->
+        def nForm = rule.clone()
+        nForm.definition.negate = !nForm.definition.negate
         ABox.any {
-          def nForm = rule.clone()
-          nForm.negate = !nForm.negate
-          return rule == nForm
+          return it == nForm
         }
       }
     }

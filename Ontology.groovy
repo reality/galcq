@@ -1,8 +1,8 @@
 import org.apache.commons.lang3.RandomStringUtils
 
 class Ontology {
-  def ABox
-  def TBox
+  def ABox = []
+  def TBox = []
   def rGen = new Random()
 
   def setABox(@DelegatesTo(DLSpec) Closure cl) {
@@ -59,10 +59,10 @@ class Ontology {
   private expand(rule, wgci) {
     if(rule.type == 'literal') {
       def expander = TBox.find { gci -> // find a gci with a left which is == to our thing
-        return rule == gci.left && gci != wgci
+        return rule == gci.left && gci != wgci && gci.type != 'literal'
       }
       if(expander) {
-        rule = expander.right
+        rule = expander.right.clone()
         return expand(rule, wgci)
       }
     } else {
