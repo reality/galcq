@@ -25,11 +25,13 @@ class Ontology {
   //   converting them to fully expanded ABox axioms
   def convertTBox() {
     TBox.each {
+      // Reduce subsumption to satisfiability via concept expansion
       ['left', 'right'].each { rule ->
         it[rule] = expand(it[rule], it)
       }
 
-      // Negate the right, AND it with the left
+      // Reduce satisfiability to consistency
+      //   Negate the right, AND it with the left
       negate(it['right'])
       def newDefinition = [
         'type': 'operation',
