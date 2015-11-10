@@ -79,4 +79,31 @@ class Ontology {
       ['left', 'right'].each { negate(rule[it]) }
     }
   }
+
+  static printRules(rules) {
+    rules.each { rule ->
+      if(rule.type == 'instance') {
+        printRule(rule.definition)
+        printRule(rule.instance)
+      }
+      println ''
+    }
+  }
+
+  private static printRule(rule) {
+    if(rule instanceof String) {
+      print "($rule)"
+    } else if(rule.type == 'literal') {
+      if(rule.negate) {
+        print '¬'
+      }
+      print rule.value
+    } else {
+      print '('
+      printRule(rule.left)
+      print " $rule.operation "
+      printRule(rule.right)
+      print ')'
+    }
+  }
 }

@@ -36,8 +36,15 @@ ontology.setTBox {
   gci 'Biscuit', 'Squirrel'
 }
 
+ontology.convertTBox()
+ontology.printRules(ontology.ABox)
+
+/*
 def reasoner = new Reasoner(ontology)
 reasoner.checkConsistency()
+*/
+
+
 
 /*
 ontology.setTBox {
