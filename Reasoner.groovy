@@ -1,10 +1,10 @@
 class Reasoner {
   def ontology
-  def ABox
+  def ABoxen
 
   def Reasoner(ontology) {
     this.ontology = ontology
-    this.ABox = ontology.ABox
+    this.ABoxen = [ ontology.ABox ]
   }
 
   def checkConsistency() {
@@ -12,17 +12,28 @@ class Reasoner {
     ontology.convertTBox() // Reduce everything to consistency problem
 
     while(rulesToApply) {
-      println ABox
-      rulesToApply = [ 'and' ].any { this."$it"() }
+      rulesToApply = ABoxen.any { ABox ->
+        [ 'and' ].any { this."$it"(ABox) }
+      }
     }
 
-    // now we will see
+    // ABox is complete, so now we will search for an open ABox
+    println ABoxen
+    println ABoxen.any { ABox ->
+      !ABox.any { rule ->
+        ABox.any {
+          def nForm = rule.clone()
+          nForm.negate = !nForm.negate
+          return rule == nForm
+        }
+      }
+    }
   }
 
   // AND rule:
   // Condition: A contains (C AND D)(a) but not both C(a) and D(a)
   // Action: A' = A UNION { C(a), D(a) }
-  def and() {
+  def and(ABox) {
     def vRule = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '⊓' }.find { instance ->
       def cA = ABox.find { it.definition == instance.definition.left }
       def cB = ABox.find { it.definition == instance.definition.right }
@@ -31,17 +42,18 @@ class Reasoner {
     }
 
     if(vRule) {
-      ABox << [
+      def newABox = ABox.clone() << [
         'type': 'instance',
         'definition': vRule.definition.left,
         'instance': vRule.instance
-      ]
-      ABox << [
+      ] << [
         'type': 'instance',
         'definition': vRule.definition.right,
         'instance': vRule.instance
       ]
-      ABox = ABox - vRule
+      newABox.remove(newABox.indexOf(vRule))
+      ABoxen.remove(ABoxen.indexOf(ABox))
+      ABoxen << newABox
     }
 
     return vRule

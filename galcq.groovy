@@ -33,11 +33,15 @@ ontology.setTBox {
 
   gci 'Person', { and 'Sleepy', 'Biscuit' }
 
+  gci 'Person', { not 'Sleepy' }
+
   gci 'Biscuit', 'Squirrel'
 }
 
+
 def reasoner = new Reasoner(ontology)
 reasoner.checkConsistency()
+println ontology.ABox
 
 /*
 ontology.setTBox {

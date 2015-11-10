@@ -13,11 +13,19 @@ class DLSpec {
   def all(r, Object[] args) { buildQuantifier('∀', r, null, args) }
 
   def not(Object arg) {
-    def dl = new DLSpec(negate:true)
-    def code = arg.rehydrate(dl, this, this)
-    code.resolveStrategy = Closure.DELEGATE_ONLY
-    code()
-    structure = dl.structure
+    if(arg instanceof String) {
+      structure << [
+        'type': 'literal',
+        'value': arg,
+        'negate': true
+      ]
+    } else {
+      def dl = new DLSpec(negate:true)
+      def code = arg.rehydrate(dl, this, this)
+      code.resolveStrategy = Closure.DELEGATE_ONLY
+      code()
+      structure = dl.structure
+    }
   }
 
   private buildQuantifier(String quantifier, String r, amt, Object[] args) {
