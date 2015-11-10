@@ -1,3 +1,5 @@
+@Grab(group='org.apache.commons', module='commons-lang3', version='3.4')
+
 // Merge the TBox into the ABox
 
 // AND rule:
@@ -16,18 +18,21 @@
 // Condition: A contains (UQr.C)(a) and r(a, b) but not C(b)
 // Action: A' = A UNION {C(b)}
 
+
+// reduce to consistentcy
+// normal form
+// apply the rules
+
 def ontology = new Ontology()
 
 // TODO: In ABox only top level blocks allowed should be instance
 ontology.setABox {}
 
 ontology.setTBox {
-  gci 'Woman', {
-    and 'Person', 'Female'
-  }
-  gci 'Person', {
-    and 'Sleepy', 'Biscuit'
-  }
+  gci 'Woman', { and 'Person', 'Female' }
+
+  gci 'Person', { and 'Sleepy', 'Biscuit' }
+
   gci 'Biscuit', 'Squirrel'
 }
 
@@ -39,7 +44,8 @@ ontology.convertTBox()
 
 println ontology.ABox
 
-/*ontology.setTBox {
+/*
+ontology.setTBox {
   gci {
     all 'r', { 
       all 's', {
@@ -67,10 +73,12 @@ println ontology.ABox
   }
 }
 
-ontology.checkConsistency()
-*/
+ontology.convertTBox()
+println ontology.ABox
 
-/*
+//ontology.checkConsistency()
+
+
 ontology.setABox {
   or 'A', {
     and 'C', { gt 3, 'hasSquirrel', 'B' }

@@ -3,13 +3,17 @@ class TBoxSpec extends DLSpec {
     def rule = [:]
     ['left':left, 'right':right].each { i, block ->
       if(block instanceof String) {
-        rule[i] = block
+        rule[i] = [
+          'type': 'literal',
+          'value': block,
+          'negate': negate
+        ]
       } else if(block instanceof Closure) {
         def dl = new DLSpec(isInstance: true)
         def code = block.rehydrate(dl, this, this)
         code.resolveStrategy = Closure.DELEGATE_ONLY
         code()
-        rule[i] = dl.structure
+        rule[i] = dl.structure[0]
       }
     }
 

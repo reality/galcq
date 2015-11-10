@@ -8,7 +8,7 @@ class ABoxSpec extends DLSpec {
       code()
 
       rule['type'] = 'instance'
-      rule['definition'] = dl.structure
+      rule['definition'] = dl.structure[0]
       rule['instance'] = var
       structure << rule
     }
@@ -22,8 +22,8 @@ class ABoxSpec extends DLSpec {
       code.resolveStrategy = Closure.DELEGATE_ONLY
       code()
 
-      rule['type'] = 'instance'
-      rule['definition'] = dl.structure
+      rule['type'] = 'relation'
+      rule['definition'] = dl.structure[0]
       rule['variable'] = var
       structure << rule
     }
