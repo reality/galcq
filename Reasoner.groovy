@@ -19,12 +19,13 @@ class Reasoner {
 
     // ABox is complete, so now we will search for an open ABox
     println ABoxen.any { ABox ->
+      ontology.printRules(ABox)
       !ABox.any { rule ->
         def nForm = rule.clone()
         nForm.definition.negate = !nForm.definition.negate
-        ABox.any {
+        ABox.findAll {
           return it == nForm
-        }
+        }.size() > 1 // to cover matching with self...
       }
     }
   }

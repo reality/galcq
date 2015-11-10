@@ -66,7 +66,7 @@ class Ontology {
         return expand(rule, wgci)
       }
     } else {
-      ['left', 'right'].each { rule[it] = expand(rule[it], wgci) }
+      ['left', 'right'].each { rule[it] = expand(rule[it], wgci).clone() }
     }
     return rule
   }
