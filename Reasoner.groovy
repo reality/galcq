@@ -11,6 +11,10 @@ class Reasoner {
     def rulesToApply = true
     ontology.convertTBox() // Reduce everything to consistency problem
 
+println 'abox rules'
+ontology.printRules(ontology.ABox)
+println ''
+
     while(rulesToApply) {
       rulesToApply = ABoxen.any { ABox ->
         [ 'and' ].any { this."$it"(ABox) }
@@ -19,8 +23,9 @@ class Reasoner {
 
     // ABox is complete, so now we will search for an open ABox
     println ABoxen.any { ABox ->
+      println 'transformed abox'
       ontology.printRules(ABox)
-      !ABox.any { rule ->
+      println 'consistent: ' + !ABox.any { rule ->
         def nForm = rule.clone()
         nForm.definition.negate = !nForm.definition.negate
         ABox.findAll {
@@ -35,8 +40,8 @@ class Reasoner {
   // Action: A' = A UNION { C(a), D(a) }
   def and(ABox) {
     def vRule = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '⊓' }.find { instance ->
-      def cA = ABox.find { it.definition == instance.definition.left }
-      def cB = ABox.find { it.definition == instance.definition.right }
+      def cA = ABox.find { it.definition == instance.definition.left && it.instance == instance.instance }
+      def cB = ABox.find { it.definition == instance.definition.right && it.instance == instance.instance }
 
       return !(cA && cB)
     }

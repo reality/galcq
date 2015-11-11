@@ -85,6 +85,10 @@ class Ontology {
       if(rule.type == 'instance') {
         printRule(rule.definition)
         printRule(rule.instance)
+      } else if(rule.type == 'gci') {
+        printRule(rule.left)
+        print ' ⊑ '
+        printRule(rule.right)
       }
       println ''
     }
