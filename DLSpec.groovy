@@ -3,15 +3,25 @@ class DLSpec {
   def isInstance
   def negate = false
 
-  def and(Object[] args) { buildJunction('⊓', args); }
-  def or(Object[] args) { buildJunction('⊔', args); }
+  def ⊓(Object[] args) { buildJunction('⊓', args) }
+  def and(Object[] args) { ⊓(args) }
 
-  def gt(amt, r, Object[] args) { buildQuantifier('≥', r, amt, args) }
-  def lt(amt, r, Object[] args) { buildQuantifier('≤', r, amt, args) }
+  def ⊔(Object[] args) { buildJunction('⊔', args) }
+  def or(Object[] args) { ⊔(args) }
 
-  def some(r, Object[] args) { buildQuantifier('∃', r, null, args); }
-  def all(r, Object[] args) { buildQuantifier('∀', r, null, args) }
+  def ≥(amt, r, Object[] args) { buildQuantifier('≥', r, amt, args) }
+  def gt(amt, r, Object[] args) { ≥(amt, r, args) }
 
+  def ≤(amt, r, Object[] args) { buildQuantifier('≤', r, amt, args) }
+  def lt(amt, r, Object[] args) { ≤(amt, r, args) }
+
+  def ∃(r, Object[] args) { buildQuantifier('∃', r, null, args); }
+  def eq(r, Object[] args) { ∃(r, args) }
+
+  def ∀(r, Object[] args) { buildQuantifier('∀', r, null, args) }
+  def uq(r, Object[] args) { ∀(r, args) }
+
+  // Apparently we're not allowed to use ¬ as a function name. 
   def not(Object arg) {
     if(arg instanceof String) {
       structure << [

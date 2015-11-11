@@ -11,9 +11,9 @@ class Reasoner {
     def rulesToApply = true
     ontology.convertTBox() // Reduce everything to consistency problem
 
-println 'abox rules'
-ontology.printRules(ontology.ABox)
-println ''
+    println 'abox rules'
+    ontology.printRules(ontology.ABox)
+    println ''
 
     while(rulesToApply) {
       rulesToApply = ABoxen.any { ABox ->
@@ -33,6 +33,39 @@ println ''
         }.size() > 1 // to cover matching with self...
       }
     }
+  }
+
+  // OR rule:
+  // Condition: A contains (C OR D)(a) but neither C(a) or D(a)
+  // Action: A' = A UNION { C(a) } and A'' = A UNION { D(a) }
+  def or(ABox) {
+    def vRule = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '⊔' }.find { instance ->
+      def cA = ABox.find { it.definition == instance.definition.left && it.instance == instance.instance }
+      def cB = ABox.find { it.definition == instance.definition.right && it.instance == instance.instance }
+
+      return !(cA || cB)
+    }
+
+    if(vRule) {
+      def firstNewABox = ABox.clone() << [
+        'type': 'instance',
+        'definition': vRule.definition.left,
+        'instance': vRule.instance
+      ]
+      def secondNewABox = ABox.clone() << [
+        'type': 'instance',
+        'definition': vRule.definition.right,
+        'instance': vRule.instance
+      ]
+
+      firstNewABox.remove(firstNewABox.indexOf(vRule))
+      secondNewABox.remove(firstNewABox.indexOf(vRule))
+
+      ABoxen.remove(ABoxen.indexOf(ABox))
+      ABoxen << firstNewABox << secondNewABox
+    }
+
+    return vRule
   }
 
   // AND rule:
@@ -63,6 +96,18 @@ println ''
 
     return vRule
   }
-}
 
-// [operation:⊓, left:[[operation:⊓, left:Sleepy, right:Squirrel]], right:Female]], instance:Woman],
+  // TODO: Existential Quantifier rule:
+  // Condition: A contains (UQr.C)(a) and r(a, b) but not C(b)
+  // Action: A' = A UNION {C(b)}
+  def eq(ABox) {
+
+  }
+
+  // TODO: Univeral Quantifier rule:
+  // Condition: A contains (UQr.C)(a) and r(a, b) but not C(b)
+  // Action: A' = A UNION {C(b)}
+  def uq(ABox) {
+
+  }
+}

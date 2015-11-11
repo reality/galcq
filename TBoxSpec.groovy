@@ -1,5 +1,5 @@
 class TBoxSpec extends DLSpec {
-  def gci(Object left, Object right) {
+  def ⊑ (Object left, Object right) {
     def rule = [:]
     ['left':left, 'right':right].each { i, block ->
       if(block instanceof String) {
