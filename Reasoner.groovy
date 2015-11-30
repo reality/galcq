@@ -1,3 +1,5 @@
+import org.apache.commons.lang3.RandomStringUtils
+
 class Reasoner {
   def ontology
   def ABoxen
@@ -17,11 +19,13 @@ class Reasoner {
 
     while(rulesToApply) {
       rulesToApply = ABoxen.any { ABox ->
-        [ 'and', 'or' ].any { this."$it"(ABox) }
+        [ 'and', 'or', 'uq', 'eq' ].any { this."$it"(ABox) }
       }
+    println 'here are the aboxen'
+    println ABoxen
     }
 
-    // ABox is complete, so now we will search for an open ABox
+    // ABoxens is complete, so now we will search for an open ABox
     println ABoxen.any { ABox ->
       println 'transformed abox'
       ontology.printRules(ABox)
@@ -33,13 +37,14 @@ class Reasoner {
         }.size() > 1 // to cover matching with self...
       }
     }
+
   }
 
   // OR rule:
   // Condition: A contains (C OR D)(a) but neither C(a) or D(a)
   // Action: A' = A UNION { C(a) } and A'' = A UNION { D(a) }
   def or(ABox) {
-    def vRule = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '⊔' }.find { instance ->
+    def vRule = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '⊔' }.find { instance ->
       def cA = ABox.find { it.definition == instance.definition.left && it.instance == instance.instance }
       def cB = ABox.find { it.definition == instance.definition.right && it.instance == instance.instance }
 
@@ -72,7 +77,7 @@ class Reasoner {
   // Condition: A contains (C AND D)(a) but not both C(a) and D(a)
   // Action: A' = A UNION { C(a), D(a) }
   def and(ABox) {
-    def vRule = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '⊓' }.find { instance ->
+    def vRule = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '⊓' }.find { instance ->
       def cA = ABox.find { it.definition == instance.definition.left && it.instance == instance.instance }
       def cB = ABox.find { it.definition == instance.definition.right && it.instance == instance.instance }
 
@@ -101,19 +106,22 @@ class Reasoner {
   // Condition: A contains (EQr.C)(a) but no c for which { r(a,c), C(c) }
   // Action: A' = A UNION { r(a, b), C(b) } where b is a new individual name
   def eq(ABox) {
-    def vRule = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '∃' }.find { eq ->
+    def vRule = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '∃' }.find { eq ->
       return !ABox.find { relation -> relation.type == 'relation' && relation.relation == eq.relation && relation.left == eq.instance && ABox.find { it.type == 'instance' && it.definition == eq.left && it.instance == relation.right } }
     }
 
     if(vRule) {
-      // create new indidivual name
+      // Random instance name, from https://bowerstudios.com/node/1100
+      def charset = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
+      def newInstance = RandomStringUtils.random(5, charset.toCharArray())
+
       def newABox = ABox.clone() << [
         'type': 'relation',
         'left': vRule.instance,
         'right': newInstance
       ] << [
         'type': 'instance',
-        'definition': vRule.left, 
+        'definition': vRule.definition, 
         'instance': newInstance
       ]
       newABox.remove(newABox.indexOf(vRule))
@@ -129,7 +137,7 @@ class Reasoner {
   // Action: A' = A UNION {C(b)}
   def uq(ABox) {
     def relation 
-    def quantifier = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '∀' }.find { uq ->
+    def quantifier = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '∀' }.find { uq ->
       ABox.find {
         def res = it.type == 'relation' && it.relation == uq.relation && it.left == uq.instance && !ABox.find { ins -> ins.instance != it.right && ins.definition == uq.definition.right }
         if(res) {
@@ -150,6 +158,6 @@ class Reasoner {
       ABoxen << newABox
     }
 
-    return vRule
+    return quantifier && relation
   }
 }
