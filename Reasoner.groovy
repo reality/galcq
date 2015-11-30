@@ -17,7 +17,7 @@ class Reasoner {
 
     while(rulesToApply) {
       rulesToApply = ABoxen.any { ABox ->
-        [ 'and' ].any { this."$it"(ABox) }
+        [ 'and', 'or' ].any { this."$it"(ABox) }
       }
     }
 
@@ -98,16 +98,58 @@ class Reasoner {
   }
 
   // TODO: Existential Quantifier rule:
-  // Condition: A contains (UQr.C)(a) and r(a, b) but not C(b)
-  // Action: A' = A UNION {C(b)}
+  // Condition: A contains (EQr.C)(a) but no c for which { r(a,c), C(c) }
+  // Action: A' = A UNION { r(a, b), C(b) } where b is a new individual name
   def eq(ABox) {
+    def vRule = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '∃' }.find { eq ->
+      return !ABox.find { relation -> relation.type == 'relation' && relation.relation == eq.relation && relation.left == eq.instance && ABox.find { it.type == 'instance' && it.definition == eq.left && it.instance = relation.right } }
+    }
 
+    if(vRule) {
+      // create new indidivual name
+      def newABox = ABox.clone() << [
+        'type': 'relation',
+        'left': vRule.instance,
+        'right': newInstance
+      ] << [
+        'type': 'instance',
+        'definition': vRule.left, 
+        'instance': newInstance
+      ]
+      newABox.remove(newABox.indexOf(vRule))
+      ABoxen.remove(ABoxen.indexOf(ABox))
+      ABoxen << newABox
+    }
+
+    return vRule
   }
 
   // TODO: Univeral Quantifier rule:
   // Condition: A contains (UQr.C)(a) and r(a, b) but not C(b)
   // Action: A' = A UNION {C(b)}
   def uq(ABox) {
+    def relation 
+    def quantifier = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '∀' }.find { uq ->
+      ABox.find {
+        def res = it.type == 'relation' && it.relation == uq.relation && it.left == uq.instance && !ABox.find { ins -> ins.instance != it.right && ins.definition == uq.definition.right }
+        if(res) {
+          relation = it
+        }
+        return res
+      }
+    }
 
+    if(quantifier && relation) {
+      def newABox = ABox.clone() << [
+        'type': 'instance',
+        'definition': quantifier.definition.right,
+        'instance': relation.right
+      ]
+      newABox.remove(newABox.indexOf(vRule))
+      ABoxen.remove(ABoxen.indexOf(ABox))
+      ABoxen << newABox
+    }
+
+    return vRule
   }
 }

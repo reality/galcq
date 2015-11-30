@@ -12,10 +12,10 @@ class ABoxSpec extends DLSpec {
     structure << rule
   }
 
-  def relation(String instance, Object left, Object right) {
+  def relation(String relation, Object left, Object right) {
     def rule = [:]
     rule['type'] = 'relation'
-    rule['instance'] = instance
+    rule['relation'] = relation
 
     ['left':left, 'right':right].each { i, x ->
       if(x instanceof String) {

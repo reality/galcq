@@ -42,6 +42,7 @@ class DLSpec {
     def rule = [:]
     rule['type'] = 'operation'
     rule['operation'] = quantifier
+    rule['relation'] = r
     if(amt) {
       rule['amount'] = amt
     }
