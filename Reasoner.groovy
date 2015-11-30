@@ -102,7 +102,7 @@ class Reasoner {
   // Action: A' = A UNION { r(a, b), C(b) } where b is a new individual name
   def eq(ABox) {
     def vRule = ABox.findAll { it.definition.type == 'operation' && it.definition.operation == '∃' }.find { eq ->
-      return !ABox.find { relation -> relation.type == 'relation' && relation.relation == eq.relation && relation.left == eq.instance && ABox.find { it.type == 'instance' && it.definition == eq.left && it.instance = relation.right } }
+      return !ABox.find { relation -> relation.type == 'relation' && relation.relation == eq.relation && relation.left == eq.instance && ABox.find { it.type == 'instance' && it.definition == eq.left && it.instance == relation.right } }
     }
 
     if(vRule) {

@@ -9,12 +9,17 @@ def ontology = new Ontology()
 
 ontology.setABox {}
 
-ontology.setTBox {
+/*ontology.setTBox {
   ⊑ 'Woman', { ⊓ 'Person', 'Female' }
 
   ⊑ 'Person', { ⊓ 'Sleepy', 'Biscuit' }
 
   ⊑ 'Biscuit', { ⊓ 'Squirrel', { not 'Sleepy' } }
+}*/
+
+ontology.setTBox {
+  ⊑ ({ ∀ 'r', { ∀ 's', { ⊓ 'A', { ∃ 'r', { ∀ 's', { ⊓ 'B', { ∀ 'r', { ∃ 's', 'C' } } } } } } } }, 
+     { ∃ 'r', { ∃ 's', { ⊓ 'A', { ⊓ 'B', 'C' } } } })
 }
 
 println 'input tbox'
@@ -23,7 +28,6 @@ println ''
 
 def reasoner = new Reasoner(ontology)
 reasoner.checkConsistency()
-
 
 
 /*

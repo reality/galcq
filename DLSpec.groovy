@@ -47,20 +47,19 @@ class DLSpec {
       rule['amount'] = amt
     }
 
-    ['left':args[0], 'right':args[1]].each { i, x ->
-      if(x instanceof String) {
-        rule[i] = [
-          'type': 'literal',
-          'value': x,
-          'negate': negate
-        ]
-      } else if(x instanceof Closure) {
-        def dl = new DLSpec(negate:negate)
-        def code = x.rehydrate(dl, this, this)
-        code.resolveStrategy = Closure.DELEGATE_ONLY
-        code()
-        rule[i] = dl.structure[0]
-      }
+    def definition = args[0]
+    if(definition instanceof String) {
+      rule['definition'] = [
+        'type': 'literal',
+        'value': definition,
+        'negate': negate
+      ]
+    } else if(definition instanceof Closure) {
+      def dl = new DLSpec(negate:negate)
+      def code = definition.rehydrate(dl, this, this)
+      code.resolveStrategy = Closure.DELEGATE_ONLY
+      code()
+      rule['definition'] = dl.structure[0]
     }
 
     structure << rule

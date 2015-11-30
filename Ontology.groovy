@@ -65,6 +65,8 @@ class Ontology {
         rule = expander.right.clone()
         return expand(rule, wgci)
       }
+    } else if(rule.type == 'operation' && (rule.operation == '∃' || rule.operation == '∀' )) {
+      rule.definition = expand(rule.definition, wgci)
     } else {
       ['left', 'right'].each { rule[it] = expand(rule[it], wgci).clone() }
     }
@@ -75,6 +77,8 @@ class Ontology {
   private negate(rule) {
     if(rule.type == 'literal') {
       rule.negate = !rule.negate
+    } else if(rule.type == 'operation' && (rule.operation == '∃' || rule.operation == '∀' )) {
+      negate(rule.definition)
     } else {
       ['left', 'right'].each { negate(rule[it]) }
     }
@@ -102,6 +106,9 @@ class Ontology {
         print '¬'
       }
       print rule.value
+    } else if(rule.type == 'operation' && (rule.operation == '∃' || rule.operation == '∀' )) {
+      print "$rule.operation$rule.relation"+"."
+      printRule(rule.definition)
     } else {
       print '('
       printRule(rule.left)
