@@ -63,9 +63,6 @@ class Reasoner {
         'instance': vRule.instance
       ]
 
-      firstNewABox.remove(firstNewABox.indexOf(vRule))
-      secondNewABox.remove(firstNewABox.indexOf(vRule))
-
       ABoxen.remove(ABoxen.indexOf(ABox))
       ABoxen << firstNewABox << secondNewABox
     }
@@ -94,7 +91,7 @@ class Reasoner {
         'definition': vRule.definition.right,
         'instance': vRule.instance
       ]
-      newABox.remove(newABox.indexOf(vRule))
+
       ABoxen.remove(ABoxen.indexOf(ABox))
       ABoxen << newABox
     }
@@ -124,7 +121,7 @@ class Reasoner {
         'definition': vRule.definition, 
         'instance': newInstance
       ]
-      newABox.remove(newABox.indexOf(vRule))
+
       ABoxen.remove(ABoxen.indexOf(ABox))
       ABoxen << newABox
     }
@@ -153,7 +150,7 @@ class Reasoner {
         'definition': quantifier.definition.right,
         'instance': relation.right
       ]
-      newABox.remove(newABox.indexOf(vRule))
+
       ABoxen.remove(ABoxen.indexOf(ABox))
       ABoxen << newABox
     }
