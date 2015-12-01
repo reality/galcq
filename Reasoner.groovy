@@ -10,39 +10,52 @@ class Reasoner {
   }
 
   def checkConsistency() {
+  }
+
+  // Non-empty TBox not allowed yet
+  def checkSubsumption(emptyTBox) {
+    println 'Testing subsumption for rules in following TBox: '
+    ontology.printRules(ontology.TBox)
+    println ''
+
     ontology.convertTBox() // Reduce everything to consistency problem
 
-    println 'abox rules'
+    println 'Reduced subsumption to satisfiability in the following ABox: '
     ontology.printRules(ontology.ABox)
     println ''
 
-    def c = 0
+    println 'Testing satisfiability . . .'
+    println ''
+
+    def result = checkSatisfiability()
+
+    println 'Satisfiable: ' + result
+    println 'Subsumption: ' + !result
+  }
+
+
+  def checkSatisfiability() {
     def rulesToApply = true
     while(rulesToApply) {
       rulesToApply = ABoxen.find { ABox ->
         [ 'and', 'or', 'uq', 'eq' ].any { this."$it"(ABox) }
       }
-      //println 'here are the aboxen'
-      //println ABoxen
-      c++
-      if(c>2) {
-        return;
-      }
     }
 
     // ABoxens is complete, so now we will search for an open ABox
-    println ABoxen.any { ABox ->
-      println 'transformed abox'
-      ontology.printRules(ABox)
-      println 'consistent: ' + !ABox.any { rule ->
-        def nForm = rule.clone()
-        nForm.definition.negate = !nForm.definition.negate
-        ABox.findAll {
-          return it == nForm
-        }.size() > 1 // to cover matching with self...
+    return ABoxen.any { ABox ->
+      //println 'transformed abox'
+      //ontology.printRules(ABox)
+      ABox.any { rule ->
+        if(rule.type != 'relation') {
+          def nForm = rule.clone()
+          nForm.definition.negate = !nForm.definition.negate
+          ABox.findAll {
+            return it.definition == nForm
+          }.size() > 1 // to cover matching with self...
+        }
       }
     }
-
   }
 
   // OR rule:
@@ -115,11 +128,6 @@ class Reasoner {
     }
 
     if(vRule) {
-    println 'run eq on:'
-    ontology.printRules([vRule])
-    println 'with abox'
-    ontology.printRules(ABox)
-println ''
       // Random instance name, from https://bowerstudios.com/node/1100
       def charset = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
       def newInstance = RandomStringUtils.random(5, charset.toCharArray())
@@ -128,11 +136,13 @@ println ''
         'type': 'relation',
         'relation': vRule.definition.relation,
         'left': vRule.instance,
-        'right': newInstance
+        'right': newInstance,
+        'negate': false
       ] << [
         'type': 'instance',
         'definition': vRule.definition.definition, 
-        'instance': newInstance
+        'instance': newInstance,
+        'negate': false
       ]
 
       ABoxen.remove(ABoxen.indexOf(ABox))
@@ -148,8 +158,10 @@ println ''
   def uq(ABox) {
     def relation 
     def quantifier = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '∀' }.find { uq ->
+    //println 'found ' + uq + ' with instance ' + uq.instance + ' and relation ' + uq.relation
       ABox.find {
-        def res = it.type == 'relation' && it.relation == uq.relation && it.left == uq.instance && !ABox.find { ins -> ins.instance != it.right && ins.definition == uq.definition.right }
+      //println 'checking relation with left ' + it.left + ' and relation ' + it.relation
+        def res = it.type == 'relation' && it.relation == uq.definition.relation && it.left == uq.instance && !ABox.any { ins -> ins.instance == it.right && ins.definition == uq.definition.definition }
         if(res) {
           relation = it
         }
@@ -158,9 +170,15 @@ println ''
     }
 
     if(quantifier && relation) {
+      /*println 'run uq on:'
+      ontology.printRules([quantifier])
+      println 'with abox'
+      ontology.printRules(ABox)
+      println ''*/
+
       def newABox = ABox.clone() << [
         'type': 'instance',
-        'definition': quantifier.definition.right,
+        'definition': quantifier.definition.definition,
         'instance': relation.right
       ]
 

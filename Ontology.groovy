@@ -56,6 +56,10 @@ class Ontology {
     return new Reasoner(this).checkConsistency()
   }
 
+  def checkSubsumption(emptyTBox) {
+    return new Reasoner(this).checkSubsumption(emptyTBox)
+  }
+
   private expand(rule, wgci) {
     if(rule.type == 'literal') {
       def expander = TBox.find { gci -> // find a gci with a left which is == to our thing

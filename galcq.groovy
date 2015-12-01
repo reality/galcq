@@ -22,12 +22,8 @@ ontology.setTBox {
      { ∃ 'r', { ∃ 's', { ⊓ 'A', { ⊓ 'B', 'C' } } } })
 }
 
-println 'input tbox'
-ontology.printRules(ontology.TBox)
-println ''
-
 def reasoner = new Reasoner(ontology)
-reasoner.checkConsistency()
+reasoner.checkSubsumption()
 
 
 /*

@@ -9,6 +9,7 @@ class ABoxSpec extends DLSpec {
     rule['type'] = 'instance'
     rule['definition'] = dl.structure[0]
     rule['instance'] = var
+    rule['negate'] = negate
     structure << rule
   }
 
