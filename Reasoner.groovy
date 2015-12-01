@@ -10,19 +10,24 @@ class Reasoner {
   }
 
   def checkConsistency() {
-    def rulesToApply = true
     ontology.convertTBox() // Reduce everything to consistency problem
 
     println 'abox rules'
     ontology.printRules(ontology.ABox)
     println ''
 
+    def c = 0
+    def rulesToApply = true
     while(rulesToApply) {
-      rulesToApply = ABoxen.any { ABox ->
+      rulesToApply = ABoxen.find { ABox ->
         [ 'and', 'or', 'uq', 'eq' ].any { this."$it"(ABox) }
       }
-    println 'here are the aboxen'
-    println ABoxen
+      //println 'here are the aboxen'
+      //println ABoxen
+      c++
+      if(c>2) {
+        return;
+      }
     }
 
     // ABoxens is complete, so now we will search for an open ABox
@@ -102,23 +107,31 @@ class Reasoner {
   // TODO: Existential Quantifier rule:
   // Condition: A contains (EQr.C)(a) but no c for which { r(a,c), C(c) }
   // Action: A' = A UNION { r(a, b), C(b) } where b is a new individual name
+  // TODO: Bad infinite loops
+
   def eq(ABox) {
     def vRule = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '∃' }.find { eq ->
-      return !ABox.find { relation -> relation.type == 'relation' && relation.relation == eq.relation && relation.left == eq.instance && ABox.find { it.type == 'instance' && it.definition == eq.left && it.instance == relation.right } }
+      !ABox.any { relation -> relation.type == 'relation' && relation.relation == eq.definition.relation && relation.left == eq.instance && ABox.find { it.type == 'instance' && it.definition == eq.definition.definition && it.instance == relation.right } }
     }
 
     if(vRule) {
+    println 'run eq on:'
+    ontology.printRules([vRule])
+    println 'with abox'
+    ontology.printRules(ABox)
+println ''
       // Random instance name, from https://bowerstudios.com/node/1100
       def charset = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
       def newInstance = RandomStringUtils.random(5, charset.toCharArray())
 
       def newABox = ABox.clone() << [
         'type': 'relation',
+        'relation': vRule.definition.relation,
         'left': vRule.instance,
         'right': newInstance
       ] << [
         'type': 'instance',
-        'definition': vRule.definition, 
+        'definition': vRule.definition.definition, 
         'instance': newInstance
       ]
 

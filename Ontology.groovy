@@ -93,6 +93,8 @@ class Ontology {
         printRule(rule.left)
         print ' ⊑ '
         printRule(rule.right)
+      } else {
+        printRule(rule)
       }
       println ''
     }
@@ -109,7 +111,10 @@ class Ontology {
     } else if(rule.type == 'operation' && (rule.operation == '∃' || rule.operation == '∀' )) {
       print "$rule.operation$rule.relation"+"."
       printRule(rule.definition)
-    } else {
+    } else if(rule.type == 'relation') {
+      printRule(rule.relation)	
+      print "($rule.left, $rule.right)"
+	} else {
       print '('
       printRule(rule.left)
       print " $rule.operation "
