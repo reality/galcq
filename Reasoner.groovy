@@ -6,7 +6,7 @@ class Reasoner {
 
   def Reasoner(ontology) {
     this.ontology = ontology
-    this.ABoxen = [ ontology.ABox ]
+    this.ABoxen = [ ontology.ABox.clone() ]
   }
 
   def checkConsistency() {
@@ -18,7 +18,7 @@ class Reasoner {
     ontology.printRules(ontology.TBox)
     println ''
 
-    ontology.convertTBox() // Reduce everything to consistency problem
+    ontology.convertTBox() // Reduce everything in the TBox into the ABox, allowing us to test subsumption via satisfiability
 
     println 'Reduced subsumption to satisfiability in the following ABox: '
     ontology.printRules(ontology.ABox)
