@@ -42,12 +42,12 @@ class Reasoner {
       rulesToApply = ABoxen.find { ABox ->
         [ 'and', 'or', 'uq', 'lte', 'eq', 'gte' ].any { this."$it"(ABox) }
       }
-      /*c++
+      c++
       if(c==2) {
         println ''
         ontology.printRules(ABoxen[0])
         break;
-      }*/
+      }
     }
     println ''
 
@@ -296,60 +296,66 @@ class Reasoner {
     def instances
     def relations
     def inequalities
-    def instanceLabels
+    def labels
 
     def vRule = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '≤' }.find { lte ->
-      instances = []
-      instanceLabels = []
-      relations = []
+      instances = 0
+      relations = 0
+      labels = []
       inequalities = []
-
+      
       // Find all the relevant relations
       ABox.each {
         if(it.type == 'relation' && it.left.value == lte.instance) {
-          relations << it.right.value
+          labels << it.right.value
+          relations++
         }
       }
+      println 'found relations' + labels
 
       // Find all the concepts relevant to the relations
       ABox.each {
-        if(it.type == 'instance' && relations.contains(it.instance) && !instanceLabels.contains(it.instance) && it.definition == lte.definition.definition) {
-          instances << it
-          instanceLabels << it.instance
+        if(it.type == 'instance' && labels.contains(it.instance) && it.definition == lte.definition.definition) {
+          instances++
         }
       }
 
        // Find explicit inequalities
       ABox.each {
-        if(it.type == 'distinction' && instanceLabels.contains(it.left) && instanceLabels.contains(it.right) && !inequalities.contains(it)) {
-          inequalities << it.instance
+        if(it.type == 'distinction' && labels.contains(it.left) && labels.contains(it.right) && !inequalities.contains(it)) {
+          inequalities << it
         }
       }
       
       def expectedDistinctions = 0
-      (0..instances.size()-2).each { i ->
-        (i+1..instances.size()-1).each { j ->
+      (0..relations-2).each { i ->
+        (i+1..relations-1).each { j ->
           expectedDistinctions++
         }
       }
+      println lte.definition.definition.value
 
       // We are happy if we found an instance for every relation, the number of these are n+1 and there is some duplicate in the instances
-      return (instances.size() == relations.size()) && (instances.size() == lte.definition.amount + 1) && (inequalities.size() < expectedDistinctions)
+      // If the relation is top, we don't have to have 
+      return (instances == relations || lte.definition.definition.type == 'literal' && lte.definition.definition.value == '⊤') &&
+        (relations == lte.definition.amount + 1) && (inequalities.size() < expectedDistinctions)
     }
 
     if(vRule) {
       print '≤'
 
       def newABox = ABox.clone() 
-      (0..instances.size()-2).each { i ->
-        (i+1..instances.size()-1).each { j ->
+      (0..relations-2).each { i ->
+        (i+1..relations-1).each { j ->
           // if there is no inequality for this pair of instances
-          if(!inequalities.find { ((it.left == instances[i].instance && it.right == instances[j].instance) || (it.left == instances[j].instance && it.right == instances[i].instance)) }) {
+          if(!inequalities.find { ((it.left == labels[i] && it.right == labels[j]) || (it.left == labels[j] && it.right == labels[i])) }) {
             // we will simply update the instance of j to = the instance of i
             newABox.each { rule ->
-              if(rule.instance && rule.instance == instances[j].instance) {
-                rule.instance = instances[i].instance
-              } // TODO : remove duplicated rules
+              if(rule.instance && rule.instance == labels[j]) {
+                rule.instance = labels[i]
+              } else if(rule.type == 'relation' && rule.right.value == labels[j]) {
+                rule.right.value = labels[i]
+              }
             }
           }
         }
