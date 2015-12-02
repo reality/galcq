@@ -37,22 +37,32 @@ class Reasoner {
     print 'Testing satisfiability . . . '
 
     def rulesToApply = true
+    def c = 0
     while(rulesToApply) {
       rulesToApply = ABoxen.find { ABox ->
-        [ 'and', 'or', 'uq', 'eq' ].any { this."$it"(ABox) }
+        [ 'and', 'or', 'uq', 'lte', 'eq', 'gte' ].any { this."$it"(ABox) }
       }
+      c++
+      /*if(c==2) {
+        println ''
+        ontology.printRules(ABoxen[0])
+        break;
+      }*/
     }
     println ''
 
     // ABoxens is 'complete' (contains no ABoxes with rules to apply), so now we will search for an 'open' (non-contradictory) ABox
     return ABoxen.any { ABox ->
       ABox.any { rule ->
-        if(rule.type != 'relation') {
-          def nForm = rule.clone()
+        def nForm = rule.clone()
+        if(rule.definition) {
           nForm.definition.negate = !nForm.definition.negate
-          ABox.findAll {
-            return it.definition == nForm
-          }.size() > 1 // to cover matching with self...
+        } else {
+          nForm.negate = !nForm.negate
+        }
+
+        !ABox.any {
+          return it == nForm
         }
       }
     }
@@ -197,6 +207,7 @@ class Reasoner {
     def vRule = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '≥' }.find { gte ->
       def instances = [] 
       def relations = []
+      def inequalities = []
 
       // Find all the relevant relations
       ABox.each {
@@ -207,25 +218,42 @@ class Reasoner {
 
       // Find all the concepts relevant to the relations
       ABox.each {
-        if(it.type == 'instance' && relations.contains(it.instance) && !instances.contains(instance.instance) && instance.definition == gte.definition.definition) {
+        if(it.type == 'instance' && relations.contains(it.instance) && !instances.contains(it.instance) && it.definition == gte.definition.definition) {
           instances << it.instance
         }
       }
 
-      // We're pleased if we didn't find an instance for every relation, or if the number of instances and relations wasn't the same as the amount stipulated in gte
-      return !(instances.size() == relations.size() && instances.size() == gte.definition.amount)
+      // Find explicit inequalities
+      ABox.each {
+        if(it.type == 'distinction' && instances.contains(it.left) && instances.contains(it.right) && !inequalities.contains(it)) {
+          inequalities << it
+        }
+      }
+      
+      def expectedDistinctions = 0
+      (0..instances.size()-2).each { i ->
+        (i+1..instances.size()-1).each { j ->
+          expectedDistinctions++
+        }
+      }
+
+      return !(instances.size() == relations.size() && instances.size() == gte.definition.amount && inequalities.size() == expectedDistinctions)
     }
 
     if(vRule) {
+      print '≥'
+
       def newABox = ABox.clone()
 
       // Add a new relation and concept for each amt in the gte rule
+      def newInstances = []
       (1..vRule.definition.amount).each {
         // Random instance name, from https://bowerstudios.com/node/1100
         def charset = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
         def newInstance = RandomStringUtils.random(5, charset.toCharArray())
 
-        ABox << [
+        // Add the relation and the instance
+        newABox << [
           'type': 'relation',
           'relation': vRule.definition.relation,
           'left': vRule.instance,
@@ -234,9 +262,23 @@ class Reasoner {
         ] << [
           'type': 'instance',
           'definition': vRule.definition.definition,
-          'instance': newInstance
+          'instance': newInstance,
           'negate': false
         ]
+
+        newInstances << newInstance
+      }
+
+      // Add distinctions for generated items
+      (0..newInstances.size()-2).each { i ->
+        (i+1..newInstances.size()-1).each { j ->
+          newABox << [
+            'type': 'distinction',
+            'left': newInstances[i],
+            'right': newInstances[j],
+            'negate': false
+          ]
+        }
       }
 
       ABoxen.remove(ABoxen.indexOf(ABox))

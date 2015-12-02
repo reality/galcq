@@ -18,21 +18,26 @@ ontology.setABox {}
 }*/
 
 /** 3.1*/
-ontology.setTBox {
+/*ontology.setTBox {
   ⊑ ({ ∀ 'r', { ∀ 's', { ⊓ 'A', { ∃ 'r', { ∀ 's', { ⊓ 'B', { ∀ 'r', { ∃ 's', 'C' } } } } } } } },
      { ∃ 'r', { ∃ 's', { ⊓ 'A', { ⊓ 'B', 'C' } } } })
-}
+}*/
 
 /*
 ontology.setTBox {
   ⊑ ({ ∀ 'r', { ∀ 's', { ⊓ 'A', { ⊔({ ∃ 'r', { ∀ 's', { not 'A' } } }, { ∀ 'r', { ∃ 's', 'B' } }) } } } },
      { ∀ 'r', { ∃ 's', { ⊔({ ⊓ 'A', 'B' }, { ∃ 'r', { ∀ 's', { not 'B' } } }) } } })
 }
-
 */
 
+ontology.setABox {
+  instance ({ ≥ 3, 'hasChild', 'John' }, 'A')
+}
+
+ontology.printRules(ontology.ABox)
+
 def reasoner = new Reasoner(ontology)
-reasoner.checkSubsumption()
+println reasoner.checkSatisfiability()
 
 
 /*

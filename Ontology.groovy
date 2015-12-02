@@ -97,6 +97,10 @@ class Ontology {
         printRule(rule.left)
         print ' ⊑ '
         printRule(rule.right)
+      } else if(rule.type == 'distinction') {
+        printRule(rule.left)
+        print ' ≠ '
+        printRule(rule.right)
       } else {
         printRule(rule)
       }
@@ -114,6 +118,9 @@ class Ontology {
       print rule.value
     } else if(rule.type == 'operation' && (rule.operation == '∃' || rule.operation == '∀' )) {
       print "$rule.operation$rule.relation"+"."
+      printRule(rule.definition)
+    } else if(rule.type == 'operation' && (rule.operation == '≤' || rule.operation == '≥' )) {
+      print "$rule.operation$rule.amount$rule.relation"+"."
       printRule(rule.definition)
     } else if(rule.type == 'relation') {
       printRule(rule.relation)	
