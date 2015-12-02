@@ -69,7 +69,6 @@ class Ontology {
   }
 
   private expand(rule, wgci) {
-    println rule
     if(rule.type == 'literal') {
       def expander = TBox.find { gci -> // find a gci with a left which is == to our thing
         return rule == gci.left && gci != wgci && gci.type != 'literal'
@@ -109,6 +108,10 @@ class Ontology {
       } else if(rule.type == 'distinction') {
         printRule(rule.left)
         print ' ≠ '
+        printRule(rule.right)
+      } else if(rule.type == 'equivalence') {
+        printRule(rule.left)
+        print ' ≡ '
         printRule(rule.right)
       } else {
         printRule(rule)
