@@ -38,11 +38,17 @@ class DLSpec {
     }
   }
 
-  private buildQuantifier(String quantifier, String r, amt, Object[] args) {
+  private buildQuantifier(String quantifier, Object r, amt, Object[] args) {
     def rule = [:]
     rule['type'] = 'operation'
     rule['operation'] = quantifier
-    rule['relation'] = r
+
+    if(r instanceof String) {
+      rule['relation'] = r
+    } else {
+      rule['amount'] = r
+    }
+
     if(amt) {
       rule['amount'] = amt
     }

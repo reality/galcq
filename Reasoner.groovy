@@ -24,23 +24,23 @@ class Reasoner {
     ontology.printRules(ontology.ABox)
     println ''
 
-    println 'Testing satisfiability . . .'
-    println ''
-
     def result = checkSatisfiability()
 
-    println 'Satisfiable: ' + result
+    println ''
     println 'Subsumption: ' + !result
   }
 
 
   def checkSatisfiability() {
+    print 'Testing satisfiability . . . '
+
     def rulesToApply = true
     while(rulesToApply) {
       rulesToApply = ABoxen.find { ABox ->
         [ 'and', 'or', 'uq', 'eq' ].any { this."$it"(ABox) }
       }
     }
+    println ''
 
     // ABoxens is complete, so now we will search for an open ABox
     return ABoxen.any { ABox ->
@@ -70,6 +70,7 @@ class Reasoner {
     }
 
     if(vRule) {
+      print '⊔'
       def firstNewABox = ABox.clone() << [
         'type': 'instance',
         'definition': vRule.definition.left,
@@ -100,6 +101,7 @@ class Reasoner {
     }
 
     if(vRule) {
+      print '⊓'
       def newABox = ABox.clone() << [
         'type': 'instance',
         'definition': vRule.definition.left,
@@ -128,6 +130,7 @@ class Reasoner {
     }
 
     if(vRule) {
+      print '∃'
       // Random instance name, from https://bowerstudios.com/node/1100
       def charset = (('a'..'z') + ('A'..'Z') + ('0'..'9')).join()
       def newInstance = RandomStringUtils.random(5, charset.toCharArray())
@@ -170,6 +173,7 @@ class Reasoner {
     }
 
     if(quantifier && relation) {
+      print '∀'
       /*println 'run uq on:'
       ontology.printRules([quantifier])
       println 'with abox'

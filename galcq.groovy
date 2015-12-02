@@ -17,10 +17,19 @@ ontology.setABox {}
   ⊑ 'Biscuit', { ⊓ 'Squirrel', { not 'Sleepy' } }
 }*/
 
+/** 3.1*/
 ontology.setTBox {
-  ⊑ ({ ∀ 'r', { ∀ 's', { ⊓ 'A', { ∃ 'r', { ∀ 's', { ⊓ 'B', { ∀ 'r', { ∃ 's', 'C' } } } } } } } }, 
+  ⊑ ({ ∀ 'r', { ∀ 's', { ⊓ 'A', { ∃ 'r', { ∀ 's', { ⊓ 'B', { ∀ 'r', { ∃ 's', 'C' } } } } } } } },
      { ∃ 'r', { ∃ 's', { ⊓ 'A', { ⊓ 'B', 'C' } } } })
 }
+
+/*
+ontology.setTBox {
+  ⊑ ({ ∀ 'r', { ∀ 's', { ⊓ 'A', { ⊔({ ∃ 'r', { ∀ 's', { not 'A' } } }, { ∀ 'r', { ∃ 's', 'B' } }) } } } },
+     { ∀ 'r', { ∃ 's', { ⊔({ ⊓ 'A', 'B' }, { ∃ 'r', { ∀ 's', { not 'B' } } }) } } })
+}
+
+*/
 
 def reasoner = new Reasoner(ontology)
 reasoner.checkSubsumption()
