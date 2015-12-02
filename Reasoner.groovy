@@ -42,8 +42,8 @@ class Reasoner {
       rulesToApply = ABoxen.find { ABox ->
         [ 'and', 'or', 'uq', 'lte', 'eq', 'gte' ].any { this."$it"(ABox) }
       }
-      c++
-      /*if(c==2) {
+      /*c++
+      if(c==2) {
         println ''
         ontology.printRules(ABoxen[0])
         break;
@@ -293,29 +293,70 @@ class Reasoner {
   //   Or basically, there's an LTE rule, and a relation and concept for each amt in lte + 1. However, the instances of these b are not all distinct
   // Action: for all i != j with bi != bj NOT EXIST IN A, Ai,j = A[bi / bj] (rather, replace bi with bj)
   def lte(ABox) {
-    def instances = [] 
-    def relations = []
+    def instances
+    def relations
+    def inequalities
+    def instanceLabels
 
     def vRule = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '≤' }.find { lte ->
       instances = []
+      instanceLabels = []
       relations = []
+      inequalities = []
 
       // Find all the relevant relations
       ABox.each {
-        if(it.type == 'relation' && it.left == gte.instance) {
-          relations << it.right
+        if(it.type == 'relation' && it.left.value == lte.instance) {
+          relations << it.right.value
         }
       }
 
       // Find all the concepts relevant to the relations
       ABox.each {
-        if(it.type == 'instance' && relations.contains(it.instance) && instance.definition == gte.definition.definition) {
-          instances << it.instance
+        if(it.type == 'instance' && relations.contains(it.instance) && !instanceLabels.contains(it.instance) && it.definition == lte.definition.definition) {
+          instances << it
+          instanceLabels << it.instance
+        }
+      }
+
+       // Find explicit inequalities
+      ABox.each {
+        if(it.type == 'distinction' && instanceLabels.contains(it.left) && instanceLabels.contains(it.right) && !inequalities.contains(it)) {
+          inequalities << it.instance
+        }
+      }
+      
+      def expectedDistinctions = 0
+      (0..instances.size()-2).each { i ->
+        (i+1..instances.size()-1).each { j ->
+          expectedDistinctions++
         }
       }
 
       // We are happy if we found an instance for every relation, the number of these are n+1 and there is some duplicate in the instances
-      return (instances.size() == relations.size()) && (instances.size() == lte.definition.amount + 1) && (instances.size() != instances.unique().size())
+      return (instances.size() == relations.size()) && (instances.size() == lte.definition.amount + 1) && (inequalities.size() < expectedDistinctions)
+    }
+
+    if(vRule) {
+      print '≤'
+
+      def newABox = ABox.clone() 
+      (0..instances.size()-2).each { i ->
+        (i+1..instances.size()-1).each { j ->
+          // if there is no inequality for this pair of instances
+          if(!inequalities.find { ((it.left == instances[i].instance && it.right == instances[j].instance) || (it.left == instances[j].instance && it.right == instances[i].instance)) }) {
+            // we will simply update the instance of j to = the instance of i
+            newABox.each { rule ->
+              if(rule.instance && rule.instance == instances[j].instance) {
+                rule.instance = instances[i].instance
+              } // TODO : remove duplicated rules
+            }
+          }
+        }
+      }
+
+      ABoxen.remove(ABoxen.indexOf(ABox))
+      ABoxen << newABox
     }
   }
 }

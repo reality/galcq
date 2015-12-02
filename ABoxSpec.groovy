@@ -1,15 +1,24 @@
 class ABoxSpec extends DLSpec {
-  def instance(Closure block, var) {
+  def instance(definition, var) {
     def rule = [:]
-    def dl = new DLSpec(isInstance: true)
-    def code = block.rehydrate(dl, this, this)
-    code.resolveStrategy = Closure.DELEGATE_ONLY
-    code()
-
     rule['type'] = 'instance'
-    rule['definition'] = dl.structure[0]
     rule['instance'] = var
     rule['negate'] = negate
+
+    if(definition instanceof String) {
+      rule['definition'] = [
+        'type': 'literal',
+        'value': definition,
+        'negate': negate
+      ]
+    } else {
+      def dl = new DLSpec(isInstance: true)
+      def code = definition.rehydrate(dl, this, this)
+      code.resolveStrategy = Closure.DELEGATE_ONLY
+      code()
+      rule['definition'] = dl.structure[0]
+    }
+
     structure << rule
   }
 

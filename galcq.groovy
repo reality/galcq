@@ -30,8 +30,17 @@ ontology.setTBox {
 }
 */
 
+  // Condition: A contains LTEnr.C(a), and there are b1,..,bn+1 with { r(a, b1), C(b1), ... r(a,bn+1), C(bn+1) } but NO { bi != bj | 1 <= i <= n, 1 <=j <= n, i != j}
 ontology.setABox {
-  instance ({ ≥ 3, 'hasChild', 'John' }, 'A')
+  instance ({ ≤ 3, 'hasChild', 'John' }, 'A')
+  relation 'hasChild', 'A', 'B'
+  relation 'hasChild', 'A', 'C'
+  relation 'hasChild', 'A', 'D'
+  relation 'hasChild', 'A', 'E'
+  instance 'John', 'B'
+  instance 'John', 'C'
+  instance 'John', 'D'
+  instance 'John', 'E'
 }
 
 ontology.printRules(ontology.ABox)
