@@ -21,11 +21,19 @@ class Ontology {
     TBox = dl.structure
   }
 
+  def expandABox() {
+    ABox.each {
+      if(it.type == 'instance') {
+        it.definition = expand(it.definition, [])
+      }
+    }
+  }
+
   // Here we use concept expansion on the generalised concept inclusions in the TBox, 
   //   converting them to fully expanded ABox axioms
   def convertTBox() {
     TBox.each {
-      // Reduce subsumption to satisfiability via concept expansion
+      // Reduce to satisfiability via concept expansion
       ['left', 'right'].each { rule ->
         it[rule] = expand(it[rule], it)
       }
@@ -61,6 +69,7 @@ class Ontology {
   }
 
   private expand(rule, wgci) {
+    println rule
     if(rule.type == 'literal') {
       def expander = TBox.find { gci -> // find a gci with a left which is == to our thing
         return rule == gci.left && gci != wgci && gci.type != 'literal'
@@ -69,7 +78,7 @@ class Ontology {
         rule = expander.right.clone()
         return expand(rule, wgci)
       }
-    } else if(rule.type == 'operation' && (rule.operation == '∃' || rule.operation == '∀' )) {
+    } else if(rule.type == 'operation' && (rule.operation == '∃' || rule.operation == '∀' || rule.operation == '≤' || rule.operation == '≥')) {
       rule.definition = expand(rule.definition, wgci)
     } else {
       ['left', 'right'].each { rule[it] = expand(rule[it], wgci).clone() }
@@ -124,7 +133,11 @@ class Ontology {
       printRule(rule.definition)
     } else if(rule.type == 'relation') {
       printRule(rule.relation)	
-      print "($rule.left, $rule.right)"
+      print "("
+      printRule(rule.left)
+      print ", " 
+      printRule(rule.right)
+      print ")"
 	} else {
       print '('
       printRule(rule.left)

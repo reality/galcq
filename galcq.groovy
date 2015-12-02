@@ -6,7 +6,7 @@
 // apply the rules
 
 def ontology = new Ontology()
-/*
+
 ontology.setTBox {
   ≡ 'ParentWithMax2Children', { ≤ 2, 'HasChild', '⊤' }
 }
@@ -16,6 +16,14 @@ ontology.setABox {
   relation 'HasChild', 'joe', 'mary'
   instance 'ParentWithMax2Children', 'joe'
 }
+
+//ontology.expandABox()
+//ontology.printRules(ontology.ABox)
+ontology.checkConsistency()
+
+/*def reasoner = new Reasoner(ontology)
+
+println reasoner.checkConsistency()
 */
 
 /*ontology.setTBox {
@@ -40,22 +48,20 @@ ontology.setTBox {
 */
 
   // Condition: A contains LTEnr.C(a), and there are b1,..,bn+1 with { r(a, b1), C(b1), ... r(a,bn+1), C(bn+1) } but NO { bi != bj | 1 <= i <= n, 1 <=j <= n, i != j}
+  /*
 ontology.setABox {
   instance ({ ≤ 3, 'hasChild', '⊤' }, 'John')
   relation 'hasChild', 'John', 'A'
   relation 'hasChild', 'John', 'B'
   relation 'hasChild', 'John', 'C'
   relation 'hasChild', 'John', 'D'
-/*  instance 'John', 'B'
+  instance 'John', 'B'
   instance 'John', 'C'
   instance 'John', 'D'
-  instance 'John', 'E'*/
+  instance 'John', 'E'
 }
+*/
 
-ontology.printRules(ontology.ABox)
-
-def reasoner = new Reasoner(ontology)
-println reasoner.checkSatisfiability()
 
 
 /*
