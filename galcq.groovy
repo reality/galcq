@@ -4,6 +4,7 @@
 // reduce to consistency
 // normal form
 // apply the rules
+// TODO: relations aren't put in as literals when generated in the eq uq rules
 
 def ontology = new Ontology()
 /*
