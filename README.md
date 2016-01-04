@@ -16,4 +16,4 @@ Check out some of the examples:
 
 Here is some example output:
 
-![groovy examples/happysubsumption.groovy](http://i.imgur.com/1Q41Nuc.png "output")
+![groovy examples/happysubsumption.groovy](http://i.imgur.com/JbR0CcB.png "output")
