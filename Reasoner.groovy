@@ -24,13 +24,14 @@ class Reasoner {
     println 'Reducing to satisfiability . . .'
     println ''
     ontology.expandABox()
+    ontology.printRules(ontology.ABox)
 
     def result = checkSatisfiability()
 
     println ''
-    println 'Consistency: ' + (result != false)
+    println 'Consistency: ' + (result[0] != false)
     println 'With the following ABox model: '
-    ontology.printRules(result)
+    ontology.printRules(result[1])
   }
 
   // Non-empty TBox not allowed yet

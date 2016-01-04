@@ -10,6 +10,4 @@ ontology.setABox {
   instance 'ParentWithMax2Children', 'joe'
 }
 
-
-ontology.expandABox()
 ontology.checkConsistency()
