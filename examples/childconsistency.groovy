@@ -1,3 +1,5 @@
+// This succeeds by building a model in which all Joe's children are the same instance (in description logics we do not assume that every symbol is unique unless explicitly stated!)
+
 def ontology = new Ontology()
 
 ontology.setTBox {

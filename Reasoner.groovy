@@ -29,7 +29,7 @@ class Reasoner {
     def result = checkSatisfiability()
 
     println ''
-    println 'Consistency: ' + (result[0] != false)
+    println 'Consistency: ' + (!result[0])
     println 'With the following ABox model: '
     ontology.printRules(result[1])
   }
