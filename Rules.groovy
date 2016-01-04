@@ -130,7 +130,6 @@ class Rules {
 
   // Greater than equal to rule
   // Condition: A contains GTEnr.C(a) but there are no c1..cn with { r(a,c1), C(c1),..., r(a,cn), C(cn) } U { ci != cj | 1 <= i <= n, 1 <= j <= n, i != j }
-  //  Or basically, there's a gte rule, but there aren't a bunch of relations and concepts expanded from them
   // Action: A' = A U { r(a, b1), C(b1) ... r(a, bn), C(bn) } U { bi != bj | 1 <= i <= n, 1 <= j <= n, i != j } where b1..bn are few individual names
   static gte(ABoxen, ABox) {
     def vRule = ABox.findAll { it.type == 'instance' && it.definition.type == 'operation' && it.definition.operation == '≥' }.find { gte ->
@@ -219,7 +218,6 @@ class Rules {
 
   // Less than equal to rule
   // Condition: A contains LTEnr.C(a), and there are b1,..,bn+1 with { r(a, b1), C(b1), ... r(a,bn+1), C(bn+1) } but NO { bi != bj | 1 <= i <= n, 1 <=j <= n, i != j}
-  //   Or basically, there's an LTE rule, and a relation and concept for each amt in lte + 1. However, the instances of these b are not all distinct
   // Action: for all i != j with bi != bj NOT EXIST IN A, Ai,j = A[bi / bj] (rather, replace bi with bj)
   static lte(ABoxen, ABox) {
     def instances
